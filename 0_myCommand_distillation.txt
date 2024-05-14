@@ -1,0 +1,50 @@
+第一次实验测试：
+--weights
+yolov5n.pt
+--cfg
+models/yolov5n.yaml
+--data
+/home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/coco.yaml
+--epochs
+2
+--batch-size
+32
+--teacher_weights
+/home/workstation2/anaconda3/0_dyc/yolov5-prune-main/yolov5s.pt
+--teacher_cfg
+models/yolov5s.yaml
+--hyp
+data/hyps/hyp.scratch-low.yaml
+--name
+yolov5n_cwd_exp2
+--feature_loss_ratio
+0.1
+--kd_loss_type
+feature
+--teacher_kd_layers
+13,17,20,23
+--student_kd_layers
+13,17,20,23
+--feature_loss_type
+cwd
+--device
+0
+第二次实验使用在第一次基础上变成双卡训练
+python -m torch.distributed.run --nproc_per_node 2 train_distill.py --weights yolov5n.pt --cfg models/yolov5n.yaml --data /home/worktion2/anaconda3/0_dyc/yolov5-prune-main/data/coco.yaml --epochs 2 --batch-size 32 --teacher_weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/yolov5s.pt --teacher_cfg models/yolov5s.yaml --hyp data/hyps/hyp.scratch-low.yaml --name yolov5n_cwd_test --feature_loss_ratio 0.1 --kd_loss_type feature --teacher_kd_layers 13,17,20,23 --student_kd_layers 13,17,20,23 --feature_loss_type cwd --device 0,1
+第三次正式实验，用剪纸前模型训练剪纸后模型
+python -m torch.distributed.run --nproc_per_node 2 train_distill.py --weights runs/train/yolov5s_lamp_exp1/weights/best.pt --prune_model --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/coco.yaml --epochs 200 --cache --batch-size 32 \
+    --teacher_weights weight/yolov5s.pt --teacher_cfg models/yolov5s.yaml \
+    --hyp data/hyps/hyp.scratch-low.yaml --name yolov5s_lamp_cwd_exp1 --kd_loss_type feature  --kd_loss_decay constant  \
+    --feature_loss_ratio 0.05 --feature_loss_type cwd --teacher_kd_layers 13,17,20,23 --student_kd_layers 13,17,20,23 --device 0，1
+
+单卡
+python train_distill.py --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs_prune/train/yolov5n_merge_EXP3/weights/best.pt --prune_model --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/VisDrone.yaml --epochs 200 --cache --batch-size 32\
+    --teacher_weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs/train/yolov5s2.0/weights/best.pt --teacher_cfg /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/models/yolov5s.yaml\
+    --hyp /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/hyps/hyp.scratch-low-ota.yaml --name yolov5nLamp_yolov5s_cwd_expMerge --kd_loss_type feature  --kd_loss_decay constant\
+    --feature_loss_ratio 0.02 --feature_loss_type cwd --teacher_kd_layers 13,17,20,23 --student_kd_layers 13,17,20,23 --device 0 \
+    > logs/yolov5nLamp_yolov5s_cwd_expMerge.log 2>&1 & tail -f logs/yolov5nLamp_yolov5s_cwd_expMerge.log
+
+
+python val.py --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs/train/yolov5nLamp_yolov5s_cwd_exp4/weights/best.pt --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/VisDrone.yaml --batch-size 32 --task val --name yolov5nlamp_yolov5s_cwd_exp4
+
+1

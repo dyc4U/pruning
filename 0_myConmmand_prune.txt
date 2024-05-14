@@ -1,0 +1,44 @@
+python -m torch.distributed.run --nproc_per_node 2 compress.py --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/VisDrone.yaml --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs/train/yolov5n2/weights/best.pt \
+    --epochs 300 --cache --batch-size 32 --hyp data/hyps/hyp.scratch-low.yaml --name yolov5n_lamp_expScratch \
+    --prune_method lamp --speed_up 2.0 --device 0,1 > logs/yolov5n_lamp_expScratch.log 2>&1 & tail -f logs/yolov5n_lamp_expScratch.log
+
+python compress.py --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/coco.yaml --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/weight/yolov5s.pt \
+    --epochs 200 --cache --batch-size 32 --hyp data/hyps/hyp.scratch-low.yaml --name yolov5s_lamp_exp1 \
+    --prune_method lamp --speed_up 2.0 --device 0
+
+python compress.py --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/coco.yaml --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/weight/yolov5s.pt \
+    --epochs 200 --cache --batch-size 64 --hyp data/hyps/hyp.scratch-low.yaml --name yolov5s_slim_exp1 \
+    --prune_method slim --speed_up 2.0 --reg 7e-3 --sl_epochs 300 --device 1  > logs/yolov5n_slim_exp1.log 2>&1 & tail -f logs/yolov5n_slim_exp1.log
+
+
+
+python compress.py --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/VisDrone.yaml --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs/train/yolov5n2/weights/best.pt \
+    --epochs 200 --cache --batch-size 32 --hyp data/hyps/hyp.scratch-low.yaml --name yolov5n_lamp_expScratch1 \
+    --prune_method lamp --speed_up 2.0 > logs/yolov5n_lamp_expScratch1.log 2>&1 & tail -f logs/yolov5n_lamp_expScratch1.log
+
+
+
+
+
+     python train.py --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/weight/yolov5m.pt --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/VisDrone.yaml --cfg /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/models/yolov5m.yaml --epochs 200 --cache --batch-size 32 \
+    --hyp /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/hyps/hyp.scratch-med.yaml --name yolov5m > logs/yolov5m.log 2>&1 & tail -f logs/yolov5m.log
+
+
+
+    python compress.py --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/VisDrone.yaml --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs/train/yolov5n2/weights/best.pt \
+    --epochs 200 --cache --batch-size 32 --hyp /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/hyps/hyp.scratch-low.yaml --name yolov5n_groupsl_exp1 \
+    --prune_method group_sl --speed_up 2.0 --reg 1e-3 --sl_epochs 300  > logs/yolov5n_groupsl_exp1.log 2>&1 & tail -f logs/yolov5n_groupsl_exp1.log
+
+    python merge.py --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/VisDrone.yaml --prune_model --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs/train/yolov5n2/weights/best.pt \
+    --epochs 5 --cache --batch-size 32 --hyp data/hyps/hyp.scratch-low.yaml --name yolov5n_merge_exp1 \
+    --teacher_weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs/train/yolov5s2.0/weights/best.pt --teacher_cfg /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/models/yolov5s.yaml \
+    --prune_method lamp --kd_loss_type feature  --kd_loss_decay constant --feature_loss_ratio 0.02 --feature_loss_type cwd --teacher_kd_layers 13,17,20,23 --student_kd_layers 13,17,20,23  --device 0\
+    --speed_up 2.0 > logs/yolov5n_merge_exp1.log 2>&1 & tail -f logs/yolov5n_merge_exp1.log
+
+
+python merge2.py --data /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/data/VisDrone.yaml --weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs/train/yolov5n2/weights/best.pt \
+--epochs 200 --prune_model --cache --batch-size 32 --hyp data/hyps/hyp.scratch-low.yaml --name yolov5n_merge2_MirrorEXP7 --teacher_weights /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/runs/train/yolov5s2.0/weights/best.pt \
+--teacher_cfg /home/workstation2/anaconda3/0_dyc/yolov5-prune-main/models/yolov5s.yaml --prune_method lamp --kd_loss_type feature --kd_loss_decay constant --feature_loss_ratio 0.02 --feature_loss_type cwd \
+--teacher_kd_layers 13,17,20,23 --student_kd_layers 13,17,20,23 --speed_up 2.0 --device 0 > logs/yolov5n_merge2_MirrorEXP7.log 2>&1 & tail -f logs/yolov5n_merge2_MirrorEXP7.log
+
+1
